@@ -1,0 +1,75 @@
+model_params:
+  model: ordinal_efficientnet
+  k: 5
+  num_classes: 5
+  pretrained: True
+
+distributed_params:
+  opt_level: O1
+
+args:
+  expdir: "src"
+  logdir: &logdir "./logs/efficientnet-5/ordinal_224_color=0.35_scale=0.35_0.75"
+
+stages:
+
+  data_params:
+    batch_size: 32
+    num_workers: 12
+    in_csv: "./data/train.csv"
+    class_column: "diagnosis"
+    input_column: "id_code"
+    train_folds: [0, 1, 2, 3, 4]
+    valid_folds: [4]
+    datapath: "./data/train_images"
+    image_size: 224
+    upsampling: False
+    crop_from_gray: True
+    circle_crop: True
+    normalize: True
+    ben_preprocess: 10
+    hor_flip: 0.5
+    ver_flip: 0.33
+    rotate: 360
+    random_scale: 0.35
+    random_scale_p: 0.75
+    brightness: 0.35
+    contrast: 0.35
+    color_p: 0.5
+
+  state_params:
+    num_epochs: &num_epochs 15
+    main_metric: &reduce_metric kappa_score
+    minimize_metric: False
+
+  criterion_params:
+    criterion: MSELoss
+
+  stage1:
+
+    optimizer_params:
+      optimizer: Adam
+      lr: 0.001
+      weight_decay: 0.00001
+
+    scheduler_params:
+      scheduler: OneCycleLR
+      num_steps: *num_epochs
+      lr_range: [0.001, 0.00004]
+      init_lr: 0.0001
+      warmup_fraction: 0.3
+
+    callbacks_params:
+      loss:
+        callback: OrdinalCriterionCallback
+      optimizer:
+        callback: OptimizerCallback
+      scheduler:
+        callback: SchedulerCallback
+        reduce_metric: *reduce_metric
+      saver:
+        callback: CheckpointCallback
+      kappa:
+        callback: KappaCallback
+        num_classes: 5
+        regression: False
