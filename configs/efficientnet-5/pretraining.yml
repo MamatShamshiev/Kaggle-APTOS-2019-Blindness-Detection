@@ -1,7 +1,7 @@
 model_params:
-  model: ordinal_efficientnet
+  model: efficientnet_pretrained
   k: 5
-  num_classes: 5
+  num_classes: 1
   pretrained: True
 
 distributed_params:
@@ -9,24 +9,24 @@ distributed_params:
 
 args:
   expdir: "src"
-  logdir: &logdir "./logs/efficientnet-5/ordinal_224_pretraining_old_data"
+  logdir: &logdir "./logs/efficientnet-5/456_pretraining_combined_ben0"
 
 stages:
 
   data_params:
-    batch_size: 30
+    batch_size: 8
     num_workers: 12
-    in_csv_train: "./old_data/df_balanced.csv"
+    in_csv_train: "./old_data/combined.csv"
     in_csv_valid: "./data/train.csv"
     class_column: "diagnosis"
     input_column: "id_code"
     datapath: "./old_data/"
-    image_size: 224
-    upsampling: True
+    image_size: 456
+    upsampling: False
     crop_from_gray: True
     circle_crop: True
     normalize: True
-    ben_preprocess: 10
+    ben_preprocess: 0
     hor_flip: 0.5
     ver_flip: 0.33
     rotate: 360
@@ -34,10 +34,10 @@ stages:
     random_scale_p: 0.75
     brightness: 0.35
     contrast: 0.35
-    color_p: 0.5
+    color_p: 0.75
 
   state_params:
-    num_epochs: &num_epochs 8
+    num_epochs: &num_epochs 10
     main_metric: &reduce_metric kappa_score
     minimize_metric: False
 
@@ -54,13 +54,13 @@ stages:
     scheduler_params:
       scheduler: OneCycleLR
       num_steps: *num_epochs
-      lr_range: [0.001, 0.00004]
+      lr_range: [0.001, 0.0001]
       init_lr: 0.00004
       warmup_fraction: 0.3
 
     callbacks_params:
       loss:
-        callback: OrdinalCriterionCallback
+        callback: CriterionCallback
       optimizer:
         callback: OptimizerCallback
       scheduler:
@@ -71,4 +71,4 @@ stages:
       kappa:
         callback: KappaCallback
         num_classes: 5
-        regression: False
+        regression: True

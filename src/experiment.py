@@ -41,15 +41,24 @@ class RetinopathyDatasetTrain(Dataset):
 
 class Experiment(ConfigExperiment):
     
-    #def _postprocess_model_for_stage(self, stage: str, model: nn.Module):
-    #    model_ = model
-    #    if isinstance(model, torch.nn.DataParallel):
-    #        model_ = model_.module
+    def _postprocess_model_for_stage(self, stage: str, model: nn.Module):
+        model_ = model
+        if isinstance(model, torch.nn.DataParallel):
+            model_ = model_.module
 
-    #    if stage in ["stage2"]:
-    #        num_features = model.model._fc.in_features
-    #        model_.model._fc = nn.Linear(num_features, 5)
-    #    return model_
+        if stage in ["stage1"]:
+            #model_.load_state_dict(torch.load('/home/mamat/Desktop/contests/aptos-blindness/logs/efficientnet-5/224_pretraining_combined/checkpoints/stage1.12.clf.pth')['model_state_dict'])
+            for param in model_.model.parameters():
+                param.requires_grad = False
+            fc = model_.model._fc
+            for param in fc.parameters():
+                param.requires_grad = True
+            print('Learnable parameters: ', sum(p.numel() for p in model_.model.parameters() if p.requires_grad))
+        if stage in ["stage2"]:
+            for param in model_.model.parameters():
+                param.requires_grad = True
+            print('Learnable parameters: ', sum(p.numel() for p in model_.model.parameters() if p.requires_grad))
+        return model_
     
     @staticmethod
     def get_transforms(
@@ -100,8 +109,8 @@ class Experiment(ConfigExperiment):
                                               crop_from_gray=crop_from_gray, 
                                               circle_crop=circle_crop,
                                               ben_preprocess=ben_preprocess,
-                                              random_scale=0.3, 
-                                              random_scale_p=0.5,
+                                              random_scale=0.0, 
+                                              random_scale_p=0.0,
                                               brightness=0,
                                               contrast=0,
                                               )        

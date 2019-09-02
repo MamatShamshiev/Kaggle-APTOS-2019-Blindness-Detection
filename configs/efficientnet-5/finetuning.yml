@@ -9,17 +9,17 @@ distributed_params:
 
 args:
   expdir: "src"
-  logdir: &logdir "./logs/efficientnet-5/finetuning_456_color=0.35_scale=0.35_0.75"
+  logdir: &logdir "./logs/efficientnet-5/finetuning_combined_456_ben0"
 
 stages:
 
   data_params:
-    batch_size: 8
+    batch_size: 32
     num_workers: 12
     in_csv: "./data/train.csv"
     class_column: "diagnosis"
     input_column: "id_code"
-    train_folds: [0, 1, 2, 3, 4]
+    train_folds: [0, 1, 2, 3]
     valid_folds: [4]
     datapath: "./data/train_images"
     image_size: 456
@@ -27,25 +27,22 @@ stages:
     crop_from_gray: True
     circle_crop: True
     normalize: True
-    ben_preprocess: 10
+    ben_preprocess: 0
     hor_flip: 0.5
     ver_flip: 0.3
     rotate: 360
     random_scale: 0.3
     random_scale_p: 0.75
-    brightness: 0.35
-    contrast: 0.35
-
-#  state_params:
-#    num_epochs: &num_epochs 5
-#    main_metric: &reduce_metric kappa_score
-#    minimize_metric: False
+    brightness: 0.2
+    contrast: 0.2
+    color_p: 0.5
 
   criterion_params:
     criterion: MSELoss
-
+  
   stage1:
-
+    data_params:
+      batch_size: 64
     state_params:
       num_epochs: &num_epochs 5
       main_metric: &reduce_metric kappa_score
@@ -56,15 +53,53 @@ stages:
       lr: 0.0001
       weight_decay: 0.000001
 
+    #scheduler_params:
+      #scheduler: MultiStepLR
+      #milestones: [2, 3]
+      #gamma: 0.1
+      #scheduler: OneCycleLR
+      #num_steps: *num_epochs
+      #lr_range: [0.0001, 0.00004]
+      #init_lr: 0.0004
+      #warmup_fraction: 0.3
+
+    callbacks_params:
+      loss:
+        callback: CriterionCallback
+      optimizer:
+        callback: OptimizerCallback
+      #scheduler:
+      #  callback: SchedulerCallback
+      #  reduce_metric: *reduce_metric
+      saver:
+        callback: CheckpointCallback
+        resume: "./logs/efficientnet-5/456_pretraining_combined_ben0/checkpoints/stage1.9.pth"
+      kappa:
+        callback: KappaCallback
+        num_classes: 5
+        regression: True
+  stage2:
+    data_params:
+      batch_size: 8
+    state_params:
+      num_epochs: 9
+      main_metric: kappa_score
+      minimize_metric: False
+
+    optimizer_params:
+      optimizer: Adam
+      lr: 0.0001
+      weight_decay: 0.000001
+
     scheduler_params:
       scheduler: MultiStepLR
-      milestones: [2, 3]
+      milestones: [3, 6]
       gamma: 0.1
       #scheduler: OneCycleLR
       #num_steps: *num_epochs
       #lr_range: [0.0001, 0.00004]
       #init_lr: 0.0004
-      #warmup_fraction: 0.2
+      #warmup_fraction: 0.3
 
     callbacks_params:
       loss:
@@ -76,7 +111,7 @@ stages:
         reduce_metric: *reduce_metric
       saver:
         callback: CheckpointCallback
-        resume: "./logs/efficientnet-5/456_pretraining_old_data/checkpoints/stage1.13.pth"
       kappa:
         callback: KappaCallback
         num_classes: 5
+        regression: True
