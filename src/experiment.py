@@ -47,7 +47,6 @@ class Experiment(ConfigExperiment):
             model_ = model_.module
 
         if stage in ["stage1"]:
-            #model_.load_state_dict(torch.load('/home/mamat/Desktop/contests/aptos-blindness/logs/efficientnet-5/224_pretraining_combined/checkpoints/stage1.12.clf.pth')['model_state_dict'])
             for param in model_.model.parameters():
                 param.requires_grad = False
             fc = model_.model._fc
