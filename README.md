@@ -36,7 +36,6 @@ We tried kappa coefficient optimization, it didn't give reliable improvement on 
 ### Hardware
 We used 1x*2080, 1x* Tesla v40, 1x*1070ti, kaggle kernels
 Ensembling
-Weighted average based on public LB gave .823 on the private LB.
 
 ### Team
 [Mamat Shamshiev](https://www.kaggle.com/mamatml), [Insaf Ashrapov](https://www.kaggle.com/insaff), [Mishunyayev Nikita](https://www.kaggle.com/mnikita)
