@@ -34,7 +34,7 @@ We tried to use leak investigated [here](https://www.kaggle.com/miklgr500/leakag
 We tried kappa coefficient optimization, it didn't give reliable improvement on public, but could help us on private almost +0.003 score.
 
 ### Hardware
-We used 1x*2080, 1x* Tesla v40, 1x*1070ti, kaggle kernels
+We used 1x*2080, 1x* Tesla v40, 1x*1070ti
 Ensembling
 
 ### Team
