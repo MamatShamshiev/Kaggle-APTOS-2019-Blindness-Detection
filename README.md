@@ -1,6 +1,6 @@
 # Kaggle-APTOS-2019-Blindness-Detection
 
-Top 3% (82/2987) solution for the [Kaggle APTOS 2019 Blindness Detection](https://www.kaggle.com/c/aptos2019-blindness-detection).
+Top 3% (76/2943) solution for the [Kaggle APTOS 2019 Blindness Detection](https://www.kaggle.com/c/aptos2019-blindness-detection).
 
 This repository consists of code and configs that were used to train our best single model. The solution is powered by awesome [Catalyst](https://github.com/catalyst-team/catalyst) library.
 
